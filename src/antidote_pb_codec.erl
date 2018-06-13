@@ -140,18 +140,18 @@ encode_abort_transaction(TxId) ->
 
 encode_txn_properties(Props) ->
   % 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
-  Certify_Value = case orddict:find(certify) of
+  Certify_Value = case orddict:find(certify,Props) of
         error -> 0;
         use_default -> 1;
         certify -> 2;
         dont_certify -> 3;
         _ -> 0
   end,
-  Update_Clock_Value = case orddict:find(update_clock) of
+  Update_Clock_Value = case orddict:find(update_clock,Props) of
         error -> true;
         Value1 -> Value1
   end,
-  Locks_Value = case orddict:find(locks) of
+  Locks_Value = case orddict:find(locks,Props) of
         error -> [];
         Value2 -> Value2
   end,
