@@ -139,7 +139,7 @@ encode_abort_transaction(TxId) ->
 
 
 encode_txn_properties(Props) ->
-  // 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
+  % 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
   Certify_Value = case orddict:find(certify) of
         error -> 0;
         use_default -> 1;
@@ -149,11 +149,11 @@ encode_txn_properties(Props) ->
   end,
   Update_Clock_Value = case orddict:find(update_clock) of
         error -> true;
-        Value -> Value
+        Value1 -> Value1
   end,
   Locks_Value = case orddict:find(locks) of
         error -> [];
-        Value -> Value
+        Value2 -> Value2
   end,
   #apbtxnproperties{certify = Certify_Value,
     locks = Locks_Value,
@@ -164,7 +164,7 @@ decode_txn_properties(Properties) ->
     locks = Locks_Value,
     update_clock = Update_Clock_Value} = Properties,
   Properties_List_0 = orddict:new(),
-  // 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
+  % 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
   Properties_List_1 = case Certify_Value of
       0 -> Properties_List_0;
       1 -> orddict:store(certify,use_default,Properties_List_0);
