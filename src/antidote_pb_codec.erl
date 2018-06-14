@@ -142,18 +142,21 @@ encode_txn_properties(Props) ->
   % 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
   Certify_Value = case orddict:find(certify,Props) of
         error -> 0;
-        use_default -> 1;
-        certify -> 2;
-        dont_certify -> 3;
+        {ok, use_default} -> 1;
+        {ok, certify} -> 2;
+        {ok, dont_certify} -> 3;
         _ -> 0
   end,
   Update_Clock_Value = case orddict:find(update_clock,Props) of
-        error -> true;
-        Value1 -> Value1
+        error -> 0;
+        {ok, true} -> 1;
+        {ok, false} -> 2;
+        _ -> 0
   end,
   Locks_Value = case orddict:find(locks,Props) of
         error -> [];
-        Value2 -> Value2
+        {ok, Value2} -> [term_to_binary(A)||A<-Value2];
+        _ -> []
   end,
   #apbtxnproperties{certify = Certify_Value,
     locks = Locks_Value,
@@ -174,7 +177,7 @@ decode_txn_properties(Properties) ->
   end,
   Properties_List_2 = case Locks_Value of
       [] -> Properties_List_1;
-      Lock_List -> orddict:store(locks,Lock_List,Properties_List_1)
+      Lock_List -> orddict:store(locks,[binary_to_term(Lock)||Lock<-Lock_List],Properties_List_1)
   end,
   _Properties_List_3 = case Update_Clock_Value of
       0 -> Properties_List_2;
@@ -591,9 +594,10 @@ decode_map_entry(#apbmapentry{key = KeyEnc, value = ValueEnc}) ->
 %% Tests encode and decode
 start_transaction_test() ->
     Clock = term_to_binary(ignore),
-    Properties = {},
+    Properties = [],
     EncRecord = antidote_pb_codec:encode(start_transaction,
                                          {Clock, Properties}),
+    ?assertMatch(true, is_record(EncRecord, apbstarttransaction)),
     [MsgCode, MsgData] = riak_pb_codec:encode(EncRecord),
     Msg = riak_pb_codec:decode(MsgCode, list_to_binary(MsgData)),
     ?assertMatch(true, is_record(Msg,apbstarttransaction)),
@@ -603,7 +607,7 @@ start_transaction_test() ->
                                           Msg#apbstarttransaction.properties)).
 
 %% Tests encode and decode
-start_transaction_test_properties_1() ->
+start_transaction_properties_1_test() ->
     Clock = term_to_binary(ignore),
     Properties = [{certify,dont_certify},{locks,[lock1,lock2]},{update_clock,true}],
     EncRecord = antidote_pb_codec:encode(start_transaction,
@@ -615,7 +619,7 @@ start_transaction_test_properties_1() ->
     ?assertMatch(Properties,
                  antidote_pb_codec:decode(txn_properties,
                                           Msg#apbstarttransaction.properties)).
-start_transaction_test_properties_2() ->
+start_transaction_properties_2_test() ->
     Clock = term_to_binary(ignore),
     Properties = [{locks,[lock1,lock2]},{update_clock,true}],
     EncRecord = antidote_pb_codec:encode(start_transaction,
@@ -627,7 +631,7 @@ start_transaction_test_properties_2() ->
     ?assertMatch(Properties,
                  antidote_pb_codec:decode(txn_properties,
                                           Msg#apbstarttransaction.properties)).
-start_transaction_test_properties_3() ->
+start_transaction_properties_3_test() ->
     Clock = term_to_binary(ignore),
     Properties = [{certify,dont_certify},{update_clock,true}],
     EncRecord = antidote_pb_codec:encode(start_transaction,
@@ -639,7 +643,7 @@ start_transaction_test_properties_3() ->
     ?assertMatch(Properties,
                  antidote_pb_codec:decode(txn_properties,
                                           Msg#apbstarttransaction.properties)).
-start_transaction_test_properties_4() ->
+start_transaction_properties_4_test() ->
     Clock = term_to_binary(ignore),
     Properties = [{certify,dont_certify},{locks,[lock1,lock2]}],
     EncRecord = antidote_pb_codec:encode(start_transaction,

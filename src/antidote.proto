@@ -132,12 +132,12 @@ message ApbOperationResp {
 
 // Properties parameters of a transaction
 message ApbTxnProperties {
-    optional Certify certify = 1;
-    optional Locks locks = 2;
-    optional Update_Clock update_clock = 3;
+    optional int32 certify = 1;
+    repeated bytes locks = 2;
+    optional int32 update_clock = 3;
 }
 // Possible Properties
-
+/*
 // 0 = not_specified | 1 = use_default | 2 = certify | 3 = dont_certify
 message Certify {
     required int32 certify =1;
@@ -149,6 +149,7 @@ message Locks {
 message Update_Clock {
     required int32 clock = 1;
 }
+*/
 
 // Object (Key) representation
 message ApbBoundObject {
