@@ -602,6 +602,58 @@ start_transaction_test() ->
                  antidote_pb_codec:decode(txn_properties,
                                           Msg#apbstarttransaction.properties)).
 
+%% Tests encode and decode
+start_transaction_test_properties_1() ->
+    Clock = term_to_binary(ignore),
+    Properties = [{certify,dont_certify},{locks,[lock1,lock2]},{update_clock,true}],
+    EncRecord = antidote_pb_codec:encode(start_transaction,
+                                         {Clock, Properties}),
+    [MsgCode, MsgData] = riak_pb_codec:encode(EncRecord),
+    Msg = riak_pb_codec:decode(MsgCode, list_to_binary(MsgData)),
+    ?assertMatch(true, is_record(Msg,apbstarttransaction)),
+    ?assertMatch(ignore, binary_to_term(Msg#apbstarttransaction.timestamp)),
+    ?assertMatch(Properties,
+                 antidote_pb_codec:decode(txn_properties,
+                                          Msg#apbstarttransaction.properties)).
+start_transaction_test_properties_2() ->
+    Clock = term_to_binary(ignore),
+    Properties = [{locks,[lock1,lock2]},{update_clock,true}],
+    EncRecord = antidote_pb_codec:encode(start_transaction,
+                                         {Clock, Properties}),
+    [MsgCode, MsgData] = riak_pb_codec:encode(EncRecord),
+    Msg = riak_pb_codec:decode(MsgCode, list_to_binary(MsgData)),
+    ?assertMatch(true, is_record(Msg,apbstarttransaction)),
+    ?assertMatch(ignore, binary_to_term(Msg#apbstarttransaction.timestamp)),
+    ?assertMatch(Properties,
+                 antidote_pb_codec:decode(txn_properties,
+                                          Msg#apbstarttransaction.properties)).
+start_transaction_test_properties_3() ->
+    Clock = term_to_binary(ignore),
+    Properties = [{certify,dont_certify},{update_clock,true}],
+    EncRecord = antidote_pb_codec:encode(start_transaction,
+                                         {Clock, Properties}),
+    [MsgCode, MsgData] = riak_pb_codec:encode(EncRecord),
+    Msg = riak_pb_codec:decode(MsgCode, list_to_binary(MsgData)),
+    ?assertMatch(true, is_record(Msg,apbstarttransaction)),
+    ?assertMatch(ignore, binary_to_term(Msg#apbstarttransaction.timestamp)),
+    ?assertMatch(Properties,
+                 antidote_pb_codec:decode(txn_properties,
+                                          Msg#apbstarttransaction.properties)).
+start_transaction_test_properties_4() ->
+    Clock = term_to_binary(ignore),
+    Properties = [{certify,dont_certify},{locks,[lock1,lock2]}],
+    EncRecord = antidote_pb_codec:encode(start_transaction,
+                                         {Clock, Properties}),
+    [MsgCode, MsgData] = riak_pb_codec:encode(EncRecord),
+    Msg = riak_pb_codec:decode(MsgCode, list_to_binary(MsgData)),
+    ?assertMatch(true, is_record(Msg,apbstarttransaction)),
+    ?assertMatch(ignore, binary_to_term(Msg#apbstarttransaction.timestamp)),
+    ?assertMatch(Properties,
+                 antidote_pb_codec:decode(txn_properties,
+                                          Msg#apbstarttransaction.properties)).
+
+
+
 read_transaction_test() ->
     Objects = [{<<"key1">>, antidote_crdt_counter_pn, <<"bucket1">>},
                {<<"key2">>, antidote_crdt_set_aw, <<"bucket2">>}],
