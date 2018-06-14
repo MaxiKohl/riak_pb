@@ -618,7 +618,9 @@ start_transaction_properties_1_test() ->
     ?assertMatch(ignore, binary_to_term(Msg#apbstarttransaction.timestamp)),
     ?assertMatch(Properties,
                  antidote_pb_codec:decode(txn_properties,
-                                          Msg#apbstarttransaction.properties)).
+                                          Msg#apbstarttransaction.properties)),
+    ?assertMatch({ok,[lock1,lock2]},orddict:find(locks,antidote_pb_codec:decode(txn_properties,
+                                          Msg#apbstarttransaction.properties))).
 start_transaction_properties_2_test() ->
     Clock = term_to_binary(ignore),
     Properties = [{locks,[lock1,lock2]},{update_clock,true}],
